@@ -17,11 +17,15 @@ $ commitment-parser <options> PDF檔名
 
 ### Library
 
-```
+```js
+import pdftojson from 'pdftojson';
 import parser from 'ppt-commitment-parser';
-parser('PDF路徑', option).then((data) => {
-    // data 格式請見下「陣列輸出」
-})
+
+pdftojson(PDF路徑).then(pdfData => {
+  return parser(pdfData, option);
+}).then(parsedData => {
+  // parsedData 格式請見下「陣列輸出」
+});
 ```
 
 
