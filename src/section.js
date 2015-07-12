@@ -10,6 +10,8 @@ class Section {
   }
 
   appendText(textToAppend) {
+    if (!textToAppend) {return;}
+
     // If the last character of current text or the first character contains
     // English, add a space between old and new pieces of text.
     //
@@ -26,7 +28,7 @@ class Section {
   }
 
   getLastItem() {
-    return this.items[this.items.length-1];
+    return this.items[this.items.length - 1];
   }
 }
 
