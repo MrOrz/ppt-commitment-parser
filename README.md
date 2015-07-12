@@ -22,10 +22,9 @@ import pdftojson from 'pdftojson';
 import parser from 'ppt-commitment-parser';
 
 pdftojson(PDF路徑).then(pdfData => {
-  return parser(pdfData, option);
-}).then(parsedData => {
+  var parsedData = parser(pdfData, parserOption);
   // parsedData 格式請見下「陣列輸出」
-});
+})
 ```
 
 
@@ -54,41 +53,41 @@ Output Format
   {
     number: 2,
     numberCH: '貳',
-    content: '政策規劃與執行',
+    text: '政策規劃與執行',
     page: 14,
     coord: [55, 373], // 左上點坐標，單位：pt
     items: [
       {
         number: 1,
         numberCH: '一',
-        content: "捷運城市",
+        text: "捷運城市",
         page: 14,
         coord: [55, 402],
         items: [
           {
             number: 1,
             numberCH: '(一)',
-            content: '發展無縫公共運輸',
+            text: '發展無縫公共運輸',
             page: 14,
             coord: [62, 427],
             items: [
               {
                 number: 1,
                 numberCH: '1',
-                content: '推動捷運建設',
+                text: '推動捷運建設',
                 page: 14,
                 coord: [80, 454],
                 items: [
-                  // Content-only
+                  // text-only
                   {
-                    content: '為配合航空城發展/* ⋯⋯ */及優質適居的低碳生態環境。',
+                    text: '為配合航空城發展/* ⋯⋯ */及優質適居的低碳生態環境。',
                     page: 14,
                     coord: [132, 480]
                   },
-                  { // Content with number
+                  { // text with number
                     number: 1,
                     numberCH: '(1)',
-                    content: '航空城捷運線(綠線)',
+                    text: '航空城捷運線(綠線)',
                     page: 14,
                     coord: [109, 556]
                     items: [ /* ... */ ]
