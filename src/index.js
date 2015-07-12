@@ -1,7 +1,6 @@
-import utils from './utils';
 import LineMachine from './lineMachine';
 
-export default function parse(pdfData, options) {
+export default function parse(pdfData, options = {}) {
   const startPage = options.start || 1,
         endPage   = options.end || pdfData.length,
         machine = new LineMachine(options.indent);
@@ -19,9 +18,4 @@ export default function parse(pdfData, options) {
   }
 
   return machine.getOutput();
-
-  function isHeaderOrFooter (word) {
-    return ;
-  }
-
 };
