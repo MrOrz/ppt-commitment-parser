@@ -20,8 +20,9 @@ var parser = require('../lib'),
         },
         i: {
           alias: 'indent',
-          demand: true,
-          describe: '最小標題的左側縮排，以 pt 為單位。在縮排線右邊的文字將不會被判定為標題。'
+          describe: '最小標題的左側縮排，以 pt 為單位。在縮排線右邊的文字將不會被判定為標題。',
+          default: Infinity,
+          type: 'Number'
         },
         h: {
           alias: 'header',
