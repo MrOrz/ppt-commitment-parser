@@ -13,7 +13,8 @@ export default function parse(pdfData, options = {}) {
         return;
       }
 
-      machine.push(word.text, pageIdx + 1, [word.xMin, word.yMin]);
+      // y coordinate must be inverted, since PDF.js uses bottom-left as (0,0).
+      machine.push(word.text, pageIdx + 1, [word.xMin, page.height - word.yMin]);
     });
   }
 

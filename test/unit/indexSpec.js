@@ -53,4 +53,13 @@ describe('parse', () => {
     expect(parsedData[0].items[0].text.slice(0, 4)).to.equal('產業城市');
 
   });
+
+  it('should invert Y coordinate of each bounding box', () => {
+    // PDF.js uses bottom-left corner as (0,0), thus inverting the Y-coord here.
+
+    const pdfData = require('../fixture/桃園1040417.json'),
+          parsedData = parser(pdfData);
+
+    expect(parsedData[0].coord[1]).to.equal(842 - 98.279297);
+  });
 });
