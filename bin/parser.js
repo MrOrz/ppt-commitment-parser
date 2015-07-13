@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 var parser = require('../lib'),
+    util = require('../lib/util'),
     fs = require('fs'),
     pdftojson = require('pdftojson'),
-    csvStringify = require('csv-stringify'),
     argv = require('yargs')
       .usage('Usage: $0 <options> inputFile.<pdf|json>')
       .version(function() {return require('../package').version})
@@ -54,44 +54,16 @@ var parser = require('../lib'),
     csvFileName = argv.output || inputFileName.replace(/\.(?:pdf|json)$/i, '.csv');
 
 if (inputFileName.endsWith('.json')) {
-  parsedDataToCSV(parser(require(process.cwd() + '/' + inputFileName), argv));
+  util.convertToCSV(parser(require(process.cwd() + '/' + inputFileName), argv))
+  .then(function(csvData) {
+    fs.writeFileSync(csvFileName, csvData);
+    console.log('Saved to', csvFileName);
+  });
 } else {
   pdftojson(inputFileName).then(function(pdfData) {
-    parsedDataToCSV(parser(pdfData, argv));
+    return util.convertToCSV(parser(pdfData, argv));
+  }).then(function(csvData) {
+    fs.writeFileSync(csvFileName, csvData);
+    console.log('Changed and saved to', csvFileName);
   });
-}
-
-function parsedDataToCSV(data) {
-  var titleStack = [],
-      stringifier = csvStringify();
-
-  function traverse(items) {
-    items.forEach(function(section) {
-      var fullTitleArray = ['', '', '', '', '', ''];
-      if (section.items.length === 0) {
-        // "Leaf" node, output to rows[]
-        //
-
-        // Build title0 ~ title5.
-        // Leave blank ('') for titles that's too deep or too shallow.
-        //
-        titleStack.forEach(function(title, idx) {
-          fullTitleArray[idx] = title;
-        });
-
-        // title0 ~ title5, page, coordinate, text
-        stringifier.write(fullTitleArray.concat(section.page, section.coord, section.text));
-      } else {
-        // Keep traversing
-        //
-        titleStack.push(section.text);
-        traverse(section.items);
-        titleStack.pop();
-      }
-    });
-  }
-
-  stringifier.pipe(fs.createWriteStream(csvFileName));
-  traverse(data);
-  stringifier.end();
 }
