@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 
 var parser = require('../lib'),
+    fs = require('fs'),
+    pdftojson = require('pdftojson'),
+    csvStringify = require('csv-stringify'),
     argv = require('yargs')
-      .usage('Usage: $0 <options> PDF檔名')
+      .usage('Usage: $0 <options> inputFile.<pdf|json>')
       .version(function() {return require('../package').version})
       .help('help')
       .options({
@@ -15,7 +18,7 @@ var parser = require('../lib'),
         e: {
           alias: 'end',
           describe: '要處理的最後一頁。頁碼從 1 開始。',
-          default: Infinity,
+          default: 0,
           type: 'Number'
         },
         i: {
@@ -42,9 +45,53 @@ var parser = require('../lib'),
         c: 1
       })
       .example('$0 YourPDF.pdf', '生成 YourPDF.csv')
+      .example('$0 YourPDF.json', '從 YourPDF.json（pdftojson 的產物）生成 YourPDF.csv')
       .example('$0 -o test.csv YourPDF.pdf', '從 YourPDF.pdf 生成 test.csv')
       .demand(1, 1)
       .argv,
 
-    pdfFileName = argv._[0],
-    csvFileName = argv.output || pdfFileName.replace(/\.pdf$/i, '.csv');
+    inputFileName = argv._[0],
+    csvFileName = argv.output || inputFileName.replace(/\.(?:pdf|json)$/i, '.csv');
+
+if (inputFileName.endsWith('.json')) {
+  parsedDataToCSV(parser(require(process.cwd() + '/' + inputFileName), argv));
+} else {
+  pdftojson(inputFileName).then(function(pdfData) {
+    parsedDataToCSV(parser(pdfData, argv));
+  });
+}
+
+function parsedDataToCSV(data) {
+  var titleStack = [],
+      stringifier = csvStringify();
+
+  function traverse(items) {
+    items.forEach(function(section) {
+      var fullTitleArray = ['', '', '', '', '', ''];
+      if (section.items.length === 0) {
+        // "Leaf" node, output to rows[]
+        //
+
+        // Build title0 ~ title5.
+        // Leave blank ('') for titles that's too deep or too shallow.
+        //
+        titleStack.forEach(function(title, idx) {
+          fullTitleArray[idx] = title;
+        });
+
+        // title0 ~ title5, page, coordinate, text
+        stringifier.write(fullTitleArray.concat(section.page, section.coord, section.text));
+      } else {
+        // Keep traversing
+        //
+        titleStack.push(section.text);
+        traverse(section.items);
+        titleStack.pop();
+      }
+    });
+  }
+
+  stringifier.pipe(fs.createWriteStream(csvFileName));
+  traverse(data);
+  stringifier.end();
+}

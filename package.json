@@ -32,8 +32,10 @@
   "homepage": "https://github.com/MrOrz/ppt-commitment-parser",
   "dependencies": {
     "babel-runtime": "^5.6.15",
+    "csv-stringify": "0.0.8",
     "debug": "^2.2.0",
     "es6-promisify": "^2.0.0",
+    "pdftojson": "0.0.2",
     "yargs": "^3.15.0",
     "zhutil": "^0.6.7"
   },
