@@ -145,5 +145,24 @@ describe('LineMachine', () => {
     expect(output[0].text).to.equal('Title No. 1');
   });
 
+  it('should move text after colons to child items in title', () => {
+    const machine = new LineMachine();
+    machine.push('1、全形冒號：這些應該要在內文', 1, [0, 0]);
+    machine.push('2、半形冒號: 這是 2 的內文', 1, [0, 20]);
+    machine.push('還有這也是', 1, [10, 40]);
+
+    const output = machine.getOutput();
+    //            壹       一      （一）
+    expect(output[0].items[0].items[0].items, 'output[0].items[0].items[0].items').to.have.length(2);
+    expect(output[0].items[0].items[0].items.map(s => s.text)).to.deep.equal([
+      '全形冒號', '半形冒號'
+    ]);
+
+    //            壹       一      （一）      1
+    expect(output[0].items[0].items[0].items[0].items[0].text).to.equal('這些應該要在內文');
+    //            壹       一      （一）      2
+    expect(output[0].items[0].items[0].items[1].items[0].text).to.equal('這是 2 的內文還有這也是');
+  })
+
   it('should give warning when the title progression is not reasonable');
 });

@@ -61,7 +61,6 @@ class LineMachine {
         level !== -1) {
       // New section detected.
       //
-      let newSection = new Section(title, page, coord, digits);
 
       // Adjust current stack to one-level shallower than
       // the detected level. (i.e. the detected level's parent)
@@ -79,9 +78,25 @@ class LineMachine {
         this._appendAndDiveIntoSection(paddingSection);
       }
 
-      this._appendAndDiveIntoSection(newSection);
+      let titleParts = title.split(/[:：]/);
+      if (titleParts.length > 1) {
+        // The part prior to colon symbol is the real title,
+        // others are text.
+
+        let titlePart = titleParts[0].trim(),
+            textPart = title.slice(titlePart.length + 1).trim(); // +1 to skip colon character
+
+        this._appendAndDiveIntoSection(new Section(titlePart, page, coord, digits));
+        this._appendAndDiveIntoSection(new Section(textPart, page, coord));
+
+      }else {
+        // Just add the title
+        this._appendAndDiveIntoSection(new Section(title, page, coord, digits));
+      }
 
     } else {
+      // Not title, should be normal text
+      //
 
       if (this._hasNoCurrentSection() || this._getCurrentSection().hasTitle()) {
         // These two cases that needs to create new section that contains pure text
