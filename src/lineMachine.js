@@ -100,18 +100,32 @@ class LineMachine {
         }
       }
 
-      if (this._hasCurrentSection()) {
-        // Check if numbering continues with last sibling section.
-        //
-        let siblingSections = this._getCurrentSection().items,
-            lastSiblingSection = siblingSections[siblingSections.length - 1];
+      // Check if numbering continues with last sibling section.
+      //
+      let lastSiblingSection;
+      if (this._getCurrentTitleLevel() === -1) { // Top level
+        lastSiblingSection = this._output[this._output.length - 1];
+      } else {
+        let siblingSections = this._getCurrentSection().items;
+        lastSiblingSection = siblingSections[siblingSections.length - 1];
+      }
 
-        if (lastSiblingSection && lastSiblingSection.number && lastSiblingSection.number !== number - 1) {
+      if (lastSiblingSection && lastSiblingSection.number) {
+        // Have sibling section that has title.
+        // Number should succeed the previous section.
+
+        if (lastSiblingSection.number !== number - 1) {
           this._onError('NUMBER_MISMATCH', {
             text, number, lastNumber: lastSiblingSection.number
           });
         }
-
+      } else if (number !== 1) {
+        // If no sibling has no title,
+        // Current title's number should be 1
+        //
+        this._onError('NUMBER_MISMATCH', {
+          text, number, lastNumber: 0
+        });
       }
 
       let titleParts = title.split(/[:：]/);
@@ -204,10 +218,12 @@ class LineMachine {
     case 'LEVEL_MISMATCH':
       console.error(`[Warning] Level mismatch: Line "${err.text}" @ p${err.page} is at level ${err.level},
         but last line was at level ${err.lastLevel}.`);
+      break;
 
     case 'NUMBER_MISMATCH':
       console.error(`[Warning] Number mismatch: Title "${err.text}" has number ${err.number}
         but the last title number in this level is ${err.lastNumber}`);
+      break;
     }
 
   }

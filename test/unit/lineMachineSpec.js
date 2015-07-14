@@ -1,4 +1,6 @@
 import {expect} from 'chai';
+import {spy} from 'sinon';
+
 import LineMachine from '../../src/lineMachine';
 
 describe('LineMachine', () => {
@@ -164,5 +166,52 @@ describe('LineMachine', () => {
     expect(output[0].items[0].items[0].items[1].items[0].text).to.equal('這是 2 的內文還有這也是');
   })
 
-  it('should give warning when the title progression is not reasonable');
+  it('should give warning when the title progression is not reasonable', () => {
+    const onError = spy(),
+          machine = new LineMachine({onError});
+
+    // Test NUMBER_MISMATCH at top level
+    //
+    machine.push('Top-level text', 1, [0, 0]);
+    machine.push('壹、中文', 1, [0, 10]);
+    expect(onError).to.have.not.been.called;
+
+    machine.push('參、跳號', 1, [0, 10]);
+    expect(onError).to.have.been.calledWith('NUMBER_MISMATCH');
+    expect(onError).to.have.been.calledOnce; // Only once
+    onError.reset();
+
+    // Test LEVEL_MISMATCH
+    //
+    machine.push('一、', 1, [0, 10]);
+    expect(onError).have.not.been.called;
+
+    machine.push('1、', 1, [0, 10]); // Level 1 -> level 3
+    expect(onError).have.been.calledOnce;
+    expect(onError).have.been.calledWith('LEVEL_MISMATCH');
+    expect(onError.getCall(0).args[1].lastLevel).to.equal(1);
+    onError.reset();
+
+    // Test NUMBER_MISMATCH on non-top level
+    //
+    machine.push('2、', 1, [0, 10]); // Level 1 -> level 3
+    expect(onError).have.not.been.called;
+    machine.push('4、', 1, [0, 10]); // Level 1 -> level 3
+    expect(onError).have.been.calledWith('NUMBER_MISMATCH');
+    expect(onError).have.been.calledOnce; // Only once
+    onError.reset();
+
+    // Test NUMBER_MISMATCH for parent
+    //
+    machine.push('伍、', 1, [0, 10]);
+    expect(onError).have.been.calledOnce;
+    expect(onError).have.been.calledWith('NUMBER_MISMATCH');
+    onError.reset();
+
+    // Test NUMBER_MISMATCH for child
+    //
+    machine.push('二、', 1, [0, 10]);
+    expect(onError).have.been.calledWith('NUMBER_MISMATCH');
+    expect(onError).have.been.calledOnce; // Only once
+  });
 });

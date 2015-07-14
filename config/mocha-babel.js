@@ -1,9 +1,9 @@
-// ChaiAsPromised setup
+// Chai setup
 //
-var chai = require('chai'),
-    chaiAsPromised = require('chai-as-promised');
+var chai = require('chai');
 
-chai.use(chaiAsPromised);
+chai.use(require('chai-as-promised'));
+chai.use(require('sinon-chai'));
 
 // http://derpturkey.com/testing-asyncawait-with-babel-and-mocha
 //
