@@ -4,7 +4,7 @@ import util from '../../src/util';
 
 describe('util', () => {
   describe('#convertToCSV', () => {
-    it('should generate CSV from given data', () => {
+    it('should generate CSV from given data, with nearest title\'s coordinates', () => {
       const input = [
         new Section('Top level text', 1, [0, 0]),
         new Section('Title of 壹', 1, [0, 20], '壹'),

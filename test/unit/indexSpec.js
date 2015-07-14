@@ -54,7 +54,7 @@ describe('parse', () => {
 
   });
 
-  it('center option should wordk', () => {
+  it('center option should work', () => {
     const pdfData = require('../fixture/taipei-culture.json'),
           parsedData = parser(pdfData, {
             indent: 77, // Only (一) can emerge from this indent
