@@ -116,7 +116,7 @@ class LineMachine {
 
         if (lastSiblingSection.number !== number - 1) {
           this._onError('NUMBER_MISMATCH', {
-            text, number, lastNumber: lastSiblingSection.number
+            text, page, number, lastNumber: lastSiblingSection.number
           });
         }
       } else if (number !== 1) {
@@ -124,7 +124,7 @@ class LineMachine {
         // Current title's number should be 1
         //
         this._onError('NUMBER_MISMATCH', {
-          text, number, lastNumber: 0
+          text, page, number, lastNumber: 0
         });
       }
 
@@ -221,7 +221,7 @@ class LineMachine {
       break;
 
     case 'NUMBER_MISMATCH':
-      console.error(`[Warning] Number mismatch: Title "${err.text}" has number ${err.number}
+      console.error(`[Warning] Number mismatch: Title "${err.text}" @ p${err.page} has number ${err.number}
         but the last title number in this level is ${err.lastNumber}`);
       break;
     }
