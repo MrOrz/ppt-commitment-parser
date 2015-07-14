@@ -31,8 +31,8 @@ describe('util', () => {
       return util.convertToCSV(input).then(output => {
         expect(output).to.equal([
           ',,,,,,1,0,0,Top level text',
-          'Title of 壹,,,,,,1,0,40,Text of 壹',
-          'Title of 貳,Title of 貳、一,Title of 貳、一、（一）,,,,3,20,30,Title of 貳、一、（一）1',
+          'Title of 壹,,,,,,1,0,20,Text of 壹',
+          'Title of 貳,Title of 貳、一,Title of 貳、一、（一）,,,,3,10,20,Title of 貳、一、（一）1',
           ''
         ].join('\n'));
       });
