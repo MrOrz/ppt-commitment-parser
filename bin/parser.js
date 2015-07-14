@@ -44,11 +44,13 @@ var parser = require('../lib'),
           describe: '頁尾頂邊位置，以 pt 為單位，頁面最上緣為 0。此線以下的所有文字都會被忽略。',
           default: Infinity,
           type: 'Number'
-        }
-      })
-      .nargs({
-        o: 1,
-        c: 1
+        },
+        o: {
+          alias: 'output',
+          describe: '生成的 CSV 檔名。預設為輸入檔案的檔名，換成 .csv 附檔名。',
+          default: null,
+          type: 'string'
+        },
       })
       .example('$0 YourPDF.pdf', '生成 YourPDF.csv')
       .example('$0 YourPDF.json', '從 YourPDF.json（pdftojson 的產物）生成 YourPDF.csv')
