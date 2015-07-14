@@ -26,7 +26,7 @@ const TITLE_NUMBER_HIERARCHY = [
 class LineMachine {
   constructor(options = {}) {
     this._output = [];
-    this._sectionStack = [];
+    this._sectionStack = []; // Level stack, each level one section
     this._indent = options.indent || Infinity;
     this._shouldDetectCenteredTitle = options.center || false;
     if (options.quiet && !options.onError) {
@@ -48,15 +48,15 @@ class LineMachine {
     return this._sectionStack.length - 1;
   }
 
-  _hasNoCurrentSection() {
-    return this._sectionStack.length === 0;
+  _hasCurrentSection() {
+    return this._sectionStack.length > 0;
   }
 
   _appendAndDiveIntoSection(section) {
     // Append the given section to current section's items,
     // and go into the given secion (set it as current section).
 
-    if (this._hasNoCurrentSection()) {
+    if (!this._hasCurrentSection()) {
       this._output.push(section);
       this._sectionStack.push(section);
     } else {
@@ -100,7 +100,7 @@ class LineMachine {
         }
       }
 
-      if (!this._hasNoCurrentSection()) {
+      if (this._hasCurrentSection()) {
         // Check if numbering continues with last sibling section.
         //
         let siblingSections = this._getCurrentSection().items,
@@ -134,7 +134,7 @@ class LineMachine {
       // Not title, should be normal text
       //
 
-      if (this._hasNoCurrentSection() || this._getCurrentSection().hasTitle()) {
+      if (!this._hasCurrentSection() || this._getCurrentSection().hasTitle()) {
         // These two cases that needs to create new section that contains pure text
         // and no title.
         //
