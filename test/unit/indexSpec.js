@@ -4,7 +4,7 @@ import parser from '../../src';
 describe('parse', () => {
   it('should process PDF as described in README', () => {
     const pdfData = require('../fixture/桃園1040417.json'),
-          parsedData = parser(pdfData);
+          parsedData = parser(pdfData, {quiet: true});
 
     expect(parsedData).to.be.an('array');
   });
@@ -13,7 +13,8 @@ describe('parse', () => {
     const pdfData = require('../fixture/桃園1040417.json'),
           parsedData = parser(pdfData, {
             start: 10,
-            end: 10
+            end: 10,
+            quiet: true
           });
 
     expect(parsedData, 'parsedData').to.have.length(1);
@@ -30,7 +31,9 @@ describe('parse', () => {
 
             /* after 產業城市, but before 加速招商 */
             header: 536,
-            footer: 724
+            footer: 724,
+
+            quiet: true
           });
 
     //                壹       八、
@@ -46,7 +49,8 @@ describe('parse', () => {
             end: 10,
 
             /* Only 八、產業城市 can emerge from this indent */
-            indent: 125
+            indent: 125,
+            quiet: true
           });
 
     expect(parsedData).to.have.length(1);
@@ -59,7 +63,8 @@ describe('parse', () => {
           parsedData = parser(pdfData, {
             indent: 77, // Only (一) can emerge from this indent
             footer: 764,
-            center: true
+            center: true,
+            quiet: true
           });
 
     expect(parsedData).to.have.length(1);
@@ -77,7 +82,7 @@ describe('parse', () => {
     // PDF.js uses bottom-left corner as (0,0), thus inverting the Y-coord here.
 
     const pdfData = require('../fixture/桃園1040417.json'),
-          parsedData = parser(pdfData);
+          parsedData = parser(pdfData, {quiet: true});
 
     expect(parsedData[0].coord[1]).to.equal(842 - 98.279297);
   });
