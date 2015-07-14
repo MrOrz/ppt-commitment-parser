@@ -2,29 +2,29 @@ import {expect} from 'chai';
 import LineMachine from '../../src/lineMachine';
 
 describe('LineMachine', () => {
-  describe('#_extractTitleLevelAndDigits', () => {
-    it('should extract correct level, text and digits', () => {
-      const machine = new LineMachine(),
+  describe('#_extractTitleLevelAndNumbers', () => {
+    it('should extract correct level, text and numbers', () => {
+      const machine = new LineMachine({quiet: true}),
             testMap = {
               '一二三這是文字、不是標題': {level: -1},
               '見(一)這是文字、不是標題': {level: -1},
-              '拾壹. 標題': {level: 0, digits: '拾壹', text: '標題'},
-              '十 、標題': {level: 1, digits: '十', text: '標題'},
-              '兩百零一、標題': {level: 1, digits: '兩百零一', text: '標題'},
-              '（一〇） 標題': {level: 2, digits: '一〇', text: '標題'},
-              '３１、415': {level: 3, digits: '３１', text: '415'},
-              '(21) 34': {level: 4, digits: '21', text: '34'},
-              '甲、乙': {level: 5, digits: '甲', text: '乙'}
+              '拾壹. 標題': {level: 0, numberCH: '拾壹', number: 11, text: '標題'},
+              '十 、標題': {level: 1, numberCH: '十', number: 10, text: '標題'},
+              '兩百零一、標題': {level: 1, numberCH: '兩百零一', number: 201, text: '標題'},
+              '（十一） 標題': {level: 2, numberCH: '十一', number: 11, text: '標題'},
+              '３１、415': {level: 3, numberCH: '３１', number: 31, text: '415'},
+              '(21) 34': {level: 4, numberCH: '21', number: 21, text: '34'},
+              '甲、乙': {level: 5, numberCH: '甲', number: 1, text: '乙'}
             };
 
       Object.keys(testMap).forEach(test => {
-        expect(machine._extractTitleLevelAndDigits(test)).to.deep.equal(testMap[test]);
+        expect(machine._extractTitleLevelAndNumbers(test)).to.deep.equal(testMap[test]);
       });
     });
   });
 
   it('should accept and joins top-level text', () => {
-    const machine = new LineMachine();
+    const machine = new LineMachine({quiet: true});
     machine.push('Line No. 1', 1, [0, 0]);
     machine.push('Line No. 2', 2, [0, 0]);
 
@@ -39,7 +39,7 @@ describe('LineMachine', () => {
   });
 
   it('should progress as new same-level title is given', () => {
-    const machine = new LineMachine();
+    const machine = new LineMachine({quiet: true});
     machine.push('壹、Title No. 1', 1, [0, 10]);
     machine.push('貳、Title No. 2', 1, [0, 20]);
     machine.push('一、Title No. 2-1', 1, [0, 30]);
@@ -58,7 +58,7 @@ describe('LineMachine', () => {
   });
 
   it('should accept shallower title', () => {
-    const machine = new LineMachine();
+    const machine = new LineMachine({quiet: true});
     machine.push('壹、Title No. 1', 1, [0, 10]);
     machine.push('一、Title No. 1-1', 1, [0, 20]);
     machine.push('（一） Title No. 1-1-1', 1, [0, 30]);
@@ -81,7 +81,7 @@ describe('LineMachine', () => {
   });
 
   it('should accept title and deepen the structure', () => {
-    const machine = new LineMachine();
+    const machine = new LineMachine({quiet: true});
     machine.push('壹、Title No. 1', 1, [0, 10]);
     machine.push('Content under 壹', 1, [0, 20]);
     machine.push('一、Title No. 1-1', 1, [0, 30]);
@@ -98,7 +98,7 @@ describe('LineMachine', () => {
   });
 
   it('should progress top-level titles and put text as child items', () => {
-    const machine = new LineMachine();
+    const machine = new LineMachine({quiet: true});
     machine.push('Line No. 1', 1, [0, 0]);
     machine.push('壹、Title No. 1', 1, [0, 10]);
 
@@ -125,7 +125,7 @@ describe('LineMachine', () => {
   });
 
   it('should not make words behind the indent to become a title', () => {
-    const machine = new LineMachine(10);
+    const machine = new LineMachine({indent: 10, quiet: true});
     machine.push('壹、Title No. 1', 1, [10, 10]); // should be title
     machine.push('貳、Fake', 1, [11, 20]); // should not be title
     machine.push('貳、Title No. 2', 1, [0, 30]); // should be title
@@ -136,7 +136,7 @@ describe('LineMachine', () => {
   });
 
   it('should support centered title', () => {
-    const machine = new LineMachine(10, true);
+    const machine = new LineMachine({indent: 10, center: true, quiet: true});
     machine.push('壹、Title No. 1', 1, [40, 10], true); // should be title
     machine.push('貳、Fake', 1, [11, 20], false);       // should not be title
 
@@ -146,7 +146,7 @@ describe('LineMachine', () => {
   });
 
   it('should move text after colons to child items in title', () => {
-    const machine = new LineMachine();
+    const machine = new LineMachine({quiet: true});
     machine.push('1、全形冒號：這些應該要在內文', 1, [0, 0]);
     machine.push('2、半形冒號: 這是 2 的內文', 1, [0, 20]);
     machine.push('還有這也是', 1, [10, 40]);

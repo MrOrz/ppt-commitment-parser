@@ -1,7 +1,8 @@
 class Section {
-  constructor(text, page, coord, numberCH = null) {
+  constructor(text, page, coord, numberCH = null, number = null) {
     if (numberCH) {
       this.numberCH = numberCH;
+      this.number = number;
     }
     this.text = text;
     this.page = page;

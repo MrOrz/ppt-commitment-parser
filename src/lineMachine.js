@@ -5,20 +5,35 @@ import {parseZHNumber} from 'zhutil';
 import Section from './section';
 
 const TITLE_NUMBER_HIERARCHY = [
-  /^([〇零壹貳參叄肆伍陸柒捌玖拾佰仟]+)\s?[、,\.，]/,     // level 0
-  /^([〇零一兩二三四五六七八九十百千]+)\s?[、,\.，]/,     // level 1
-  /^[(（]\s?([〇零一兩二三四五六七八九十百千]+)\s?[)）]/, // level 2
-  /^(\d+|[０１２３４５６７８９]+)\s?[、,\.，]/,         // level 3
-  /^[(（]\s?(\d+|[０１２３４５６７８９]+)\s?[)）]/,     // level 4
-  /^([甲乙丙丁戊己庚辛壬癸])\s?[、,\.，]/,              // level 5
-], TITLE_NUMBER_HIERARCHY_COUNT = TITLE_NUMBER_HIERARCHY.length
+    /^([〇零壹貳參叄肆伍陸柒捌玖拾佰仟]+)\s?[、,\.，]/,     // level 0
+    /^([〇零一兩二三四五六七八九十百千]+)\s?[、,\.，]/,     // level 1
+    /^[(（]\s?([〇零一兩二三四五六七八九十百千]+)\s?[)）]/, // level 2
+    /^(\d+|[０１２３４５６７８９]+)\s?[、,\.，]/,         // level 3
+    /^[(（]\s?(\d+|[０１２３４５６７８９]+)\s?[)）]/,     // level 4
+    /^([甲乙丙丁戊己庚辛壬癸])\s?[、,\.，]/,              // level 5
+  ],
+  TITLE_NUMBER_HIERARCHY_COUNT = TITLE_NUMBER_HIERARCHY.length,
+  FULLWIDTH_NUMBER_MAP = {
+    '０': 0, '１': 1, '２': 2, '３': 3, '４': 4,
+    '５': 5, '６': 6, '７': 7, '８': 8, '９': 9
+  },
+  HEAVENSTEM_NUMBER_MAP = {
+    '甲': 1, '乙': 2, '丙': 3, '丁': 4, '戊': 5,
+    '己': 6, '庚': 7, '辛': 8, '壬': 9, '癸': 10
+  },
+  NOOP = function() {};
 
 class LineMachine {
-  constructor(indent = Infinity, center = false) {
+  constructor(options = {}) {
     this._output = [];
     this._sectionStack = [];
-    this._indent = indent;
-    this._shouldDetectCenteredTitle = center;
+    this._indent = options.indent || Infinity;
+    this._shouldDetectCenteredTitle = options.center || false;
+    if (options.quiet && !options.onError) {
+      this._onError = NOOP;
+    }else {
+      this._onError = options.onError || this.onError;
+    }
   }
 
   _getCurrentSection() {
@@ -55,7 +70,7 @@ class LineMachine {
   }
 
   push(text, page, coord, isCentered = false) {
-    const {level, digits, text: title} = this._extractTitleLevelAndDigits(text);
+    const {level, numberCH, number, text: title} = this._extractTitleLevelAndNumbers(text);
 
     if ((coord[0] <= this._indent || (this._shouldDetectCenteredTitle && isCentered)) &&
         level !== -1) {
@@ -70,12 +85,33 @@ class LineMachine {
         this._popFromCurrentSection();
       }
 
-      while (this._getCurrentTitleLevel() < level - 1) {
+      if (this._getCurrentTitleLevel() < level - 1) {
         // Too shallow, add some padding sections.
         // TODO: give warnings here, since this often means a mistake in structure.
         //
-        let paddingSection = new Section('', page, coord);
-        this._appendAndDiveIntoSection(paddingSection);
+        this._onError('LEVEL_MISMATCH', {
+          text, page, coord, level, lastLevel: this._getCurrentTitleLevel()
+        });
+
+        while (this._getCurrentTitleLevel() < level - 1) {
+
+          let paddingSection = new Section('', page, coord);
+          this._appendAndDiveIntoSection(paddingSection);
+        }
+      }
+
+      if (!this._hasNoCurrentSection()) {
+        // Check if numbering continues with last sibling section.
+        //
+        let siblingSections = this._getCurrentSection().items,
+            lastSiblingSection = siblingSections[siblingSections.length - 1];
+
+        if (lastSiblingSection && lastSiblingSection.number && lastSiblingSection.number !== number - 1) {
+          this._onError('NUMBER_MISMATCH', {
+            text, number, lastNumber: lastSiblingSection.number
+          });
+        }
+
       }
 
       let titleParts = title.split(/[:：]/);
@@ -86,12 +122,12 @@ class LineMachine {
         let titlePart = titleParts[0].trim(),
             textPart = title.slice(titlePart.length + 1).trim(); // +1 to skip colon character
 
-        this._appendAndDiveIntoSection(new Section(titlePart, page, coord, digits));
+        this._appendAndDiveIntoSection(new Section(titlePart, page, coord, numberCH, number));
         this._appendAndDiveIntoSection(new Section(textPart, page, coord));
 
-      }else {
+      } else {
         // Just add the title
-        this._appendAndDiveIntoSection(new Section(title, page, coord, digits));
+        this._appendAndDiveIntoSection(new Section(title, page, coord, numberCH, number));
       }
 
     } else {
@@ -118,19 +154,62 @@ class LineMachine {
     return this._output;
   }
 
-  _extractTitleLevelAndDigits(text) {
+  _extractTitleLevelAndNumbers(text) {
     var level, match;
     text = text.trim();
     for (level = TITLE_NUMBER_HIERARCHY_COUNT - 1; level >= 0 ; level -= 1) {
       if (match = TITLE_NUMBER_HIERARCHY[level].exec(text)) {
         return {
           level,
-          digits: match[1],
+          numberCH: match[1],
+          number: this._parseNumber(match[1], level),
           text: text.slice(match[0].length).trim() // text after numbering
         };
       };
     }
     return {level}; // {level: -1} for non-titles
+  }
+
+  _parseNumber(input, titleLevel) {
+    var number = 0 ;
+    if (titleLevel <= 2) {
+      number = parseZHNumber(input);
+    } else if (titleLevel <= 4) {
+      if (input.match(/\d+/)) {
+        number = +input;
+      } else {
+        let inputLength = input.length;
+        for (let i = 0; i < inputLength; i += 1) {
+          number = 10 * number + FULLWIDTH_NUMBER_MAP[input[i]];
+        }
+      }
+    } else {
+      // 甲乙丙丁
+      number = HEAVENSTEM_NUMBER_MAP[input];
+    }
+
+    if (isNaN(number)) {
+      this._onError('PARSE_NUM', {input, level: titleLevel});
+    }
+
+    return number;
+  }
+
+  onError(type, err) {
+    switch (type){
+    case 'PARSE_NUM':
+      console.error('[Error] Number parsing error: ', err.input);
+      break;
+
+    case 'LEVEL_MISMATCH':
+      console.error(`[Warning] Level mismatch: Line "${err.text}" @ p${err.page} is at level ${err.level},
+        but last line was at level ${err.lastLevel}.`);
+
+    case 'NUMBER_MISMATCH':
+      console.error(`[Warning] Number mismatch: Title "${err.text}" has number ${err.number}
+        but the last title number in this level is ${err.lastNumber}`);
+    }
+
   }
 }
 

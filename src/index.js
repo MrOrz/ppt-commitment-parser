@@ -8,7 +8,7 @@ const CENTER_DIFFERENCE_RATIO = 0.1;
 export default function parse(pdfData, options = {}) {
   const startPage = options.start || 1,
         endPage   = options.end || pdfData.length,
-        machine = new LineMachine(options.indent, options.center);
+        machine = new LineMachine(options);
 
   for (let pageIdx = startPage - 1; pageIdx < endPage; pageIdx += 1) {
     let page = pdfData[pageIdx];
