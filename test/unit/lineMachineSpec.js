@@ -133,7 +133,17 @@ describe('LineMachine', () => {
     const output = machine.getOutput();
     expect(output, 'output').to.have.length(2);
     expect(output[1].text).to.equal('Title No. 2');
-  })
+  });
+
+  it('should support centered title', () => {
+    const machine = new LineMachine(10, true);
+    machine.push('壹、Title No. 1', 1, [40, 10], true); // should be title
+    machine.push('貳、Fake', 1, [11, 20], false);       // should not be title
+
+    const output = machine.getOutput();
+    expect(output, 'output').to.have.length(1);
+    expect(output[0].text).to.equal('Title No. 1');
+  });
 
   it('should give warning when the title progression is not reasonable');
 });

@@ -14,10 +14,11 @@ const TITLE_NUMBER_HIERARCHY = [
 ], TITLE_NUMBER_HIERARCHY_COUNT = TITLE_NUMBER_HIERARCHY.length
 
 class LineMachine {
-  constructor(indent = Infinity) {
+  constructor(indent = Infinity, center = false) {
     this._output = [];
     this._sectionStack = [];
     this._indent = indent;
+    this._shouldDetectCenteredTitle = center;
   }
 
   _getCurrentSection() {
@@ -53,10 +54,11 @@ class LineMachine {
     this._sectionStack.pop();
   }
 
-  push(text, page, coord) {
+  push(text, page, coord, isCentered = false) {
     const {level, digits, text: title} = this._extractTitleLevelAndDigits(text);
 
-    if (coord[0] <= this._indent && level !== -1) {
+    if ((coord[0] <= this._indent || (this._shouldDetectCenteredTitle && isCentered)) &&
+        level !== -1) {
       // New section detected.
       //
       let newSection = new Section(title, page, coord, digits);

@@ -54,6 +54,25 @@ describe('parse', () => {
 
   });
 
+  it('center option should wordk', () => {
+    const pdfData = require('../fixture/taipei-culture.json'),
+          parsedData = parser(pdfData, {
+            indent: 77, // Only (一) can emerge from this indent
+            footer: 764,
+            center: true
+          });
+
+    expect(parsedData).to.have.length(1);
+    expect(parsedData[0].text).to.equal('文 化');
+
+    // 一、重要施政成果；二、創新作為；三、未來重點
+    expect(parsedData[0].items, 'parsedData[0].items').to.have.length(3);
+    expect(parsedData[0].items[0].text).to.equal('103 年度下半年重要施政成果');
+
+    // (一)～(五)
+    expect(parsedData[0].items[0].items, 'parsedData[0].items[0].items').to.have.length(5);
+  })
+
   it('should invert Y coordinate of each bounding box', () => {
     // PDF.js uses bottom-left corner as (0,0), thus inverting the Y-coord here.
 

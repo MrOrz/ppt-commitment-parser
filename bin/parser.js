@@ -27,6 +27,12 @@ var parser = require('../lib'),
           default: Infinity,
           type: 'Number'
         },
+        c: {
+          alias: 'center',
+          describe: '除左側標題外，也對置中的文字判定是否為標題。',
+          default: false,
+          type: 'boolean'
+        },
         h: {
           alias: 'header',
           describe: '頁首底邊位置，以 pt 為單位，頁面最上緣為 0。此線以上的所有文字都會被忽略。',
