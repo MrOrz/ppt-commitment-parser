@@ -231,10 +231,10 @@ class LineMachine {
     case 'LEVEL_MISMATCH':
       if (err.lastLevel === -1) { // top level
         msg = `[Warning] 「${err.text}」（p${err.page}）的文章標號從「${this._getHierarchyNotation(err.level, err.numberCH)}」開始，不符合標號階層。`;
-      }else {
+      } else {
         let section = this._getCurrentSection();
         if (section.numberCH) {
-          msg = `[Warning] 文章階層有誤：「${err.text}」（p${err.page}）文章標號為「${this._getHierarchyNotation(err.level, err.numberCH)}」，但前文標號為「${this._getHierarchyNotation(section.level, section.numberCH)}」。`;
+          msg = `[Warning] 文章階層有誤：「${err.text}」（p${err.page}）文章標號為「${this._getHierarchyNotation(err.level, err.numberCH)}」，但前文標號為「${this._getHierarchyNotation(err.lastLevel, section.numberCH)}」。`;
         }else {
           msg = `[Warning] 文章階層有誤：「${err.text}」（p${err.page}）文章標號為「${this._getHierarchyNotation(err.level, err.numberCH)}」，但前文階層為 ${err.lastLevel}。`;
         }
