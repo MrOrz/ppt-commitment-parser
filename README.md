@@ -43,7 +43,7 @@ Output Format
 
 ```csv
 # 前 6 個固定是分層，第 7 個是頁碼，第 8、9 是左上點 x、y 坐標（pt），第 10 個是內文
-# 坐標為最小的標題的坐標。
+# 坐標為最小的標題的坐標，以頁面左下角為原點。。
 "政策規劃與執行","捷運城市","發展無縫公共運輸","推動捷運建設","","",14,80,454,"為配合//⋯⋯"
 "政策規劃與執行","捷運城市","發展無縫公共運輸","推動捷運建設","航空城捷運線(綠線)","",14,109,556,"航空城捷運線(綠線)總長約//⋯⋯"
 # ...
@@ -58,7 +58,7 @@ Output Format
     numberCH: '貳',
     text: '政策規劃與執行',
     page: 14,
-    coord: [55, 373], // 左上點坐標，單位：pt
+    coord: [55, 373], // 頁面左下點為原點，單位：pt
     items: [
       {
         number: 1,
@@ -106,3 +106,52 @@ Output Format
 ]
 ```
 
+Error Handling
+--------------
+
+```js
+pdftojson(PDF路徑, {onError: (errType, errPayload) => {}}) // returns a promise
+```
+
+`onError` callback 的 `this` 會被設成 `LineMachine` instance，因此可以存取 `LineMachine` 的 method （請見 [`LineMachine` 的實作](https://github.com/g0v/ppt-commitment-parser/blob/master/src/lineMachine.js)）。
+
+### `errType === 'PARSE_NUM'`
+
+```js
+errPayload === {
+  input // 中文數字
+}
+```
+
+`errPayload.input` 無法被轉為數字。
+
+### `errType === 'NUMBER_MISMATCH'`
+
+```js
+errPayload === {
+  text, // 出錯的該行文字
+  page, // 出錯文字所在頁碼
+  number, // 出錯文字的標號（已轉數字）
+  lastSiblingSection, // 同層前一 Section instance（若出錯的是該層第一項，則為 undefined）
+}
+```
+
+各層標題應該要從 1 開始而且連續，若有數字不連續的狀況，就會觸發此 error。
+
+### `errType === 'LEVEL_MISMATCH'`
+
+```js
+errPayload === {
+  text, // 出錯的該行文字
+  page, // 出錯文字所在頁碼
+  coord, // 出錯文字所在頁面坐標（左下為原點，單位 pt）
+  level, // 標題層級（-1 為頂層，0 為「壹、」，6 為「甲、」）
+  lastLevel, // 前文標題層級
+  numberCH // 出錯文字的標號
+}
+```
+
+`errPayload.text` 的標題階層與所在之前文不符。
+
+標題階層應依序為「壹、」、「一、」、「（一）」、「1、」、「（1）」、「甲、」六層。
+若某一行突然向下太多層（例如說原本在「一、」，突然有一行用「1、」標號），就會觸發此 error。

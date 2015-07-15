@@ -51,6 +51,13 @@ var parser = require('../lib'),
           default: null,
           type: 'string'
         },
+
+        q: {
+          alias: 'quiet',
+          describe: '不在 console 印出行數、文章階層相關的錯誤訊息。',
+          default: false,
+          type: 'boolean'
+        }
       })
       .example('$0 YourPDF.pdf', '生成 YourPDF.csv')
       .example('$0 YourPDF.json', '從 YourPDF.json（pdftojson 的產物）生成 YourPDF.csv')
