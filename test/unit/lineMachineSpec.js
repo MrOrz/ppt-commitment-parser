@@ -15,6 +15,7 @@ describe('LineMachine', () => {
               '十 、標題': {level: 1, numberCH: '十', number: 10, text: '標題'},
               '兩百零一、標題': {level: 1, numberCH: '兩百零一', number: 201, text: '標題'},
               '（十一） 標題': {level: 2, numberCH: '十一', number: 11, text: '標題'},
+              '（ㄧ）開設課程（學程）多元化、實用化': {level: 2, numberCH: 'ㄧ', number: 1, text: '開設課程（學程）多元化、實用化'}, // zhu-yin ㄧ orz
               '３１、415': {level: 3, numberCH: '３１', number: 31, text: '415'},
               '(21) 34': {level: 4, numberCH: '21', number: 21, text: '34'},
               '甲、乙': {level: 5, numberCH: '甲', number: 1, text: '乙'},
