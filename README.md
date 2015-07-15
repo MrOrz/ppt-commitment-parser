@@ -4,7 +4,7 @@ ppt-commitment-parser
 [![Build Status](https://travis-ci.org/g0v/ppt-commitment-parser.svg)](https://travis-ci.org/g0v/ppt-commitment-parser) [![Coverage Status](https://coveralls.io/repos/g0v/ppt-commitment-parser/badge.svg?branch=master&service=github)](https://coveralls.io/github/g0v/ppt-commitment-parser?branch=master)
 
 將施政報告或施政綱要 PDF 轉換成 CSV 的工具。
-PDF 檔必須要用公文書格式進行標號（階層依序為「壹、」「一、」「(一)」「1、」「(1)」「甲、」，系統會處理半型全型的差異），方能處理。
+PDF 檔必須要用公文書格式進行標號（階層依序為「壹、」「一、」「(一)」「1、」「(1)」「甲、 或 Ａ.」，系統會處理半型全型的差異），方能處理。
 
 Usage
 -----
