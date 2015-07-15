@@ -5,7 +5,7 @@ import {parseZHNumber} from 'zhutil';
 import Section from './section';
 
 const TITLE_NUMBER_HIERARCHY = [
-    /^([〇零壹貳參叄肆伍陸柒捌玖拾佰仟]+)\s?[、\.]/,      // level 0
+    /^([〇零壹貳參叄叁肆伍陸柒捌玖拾佰仟]+)\s?[、\.]/,      // level 0
     /^([〇零一兩二三四五六七八九十百千]+)\s?[、\.]/,      // level 1
     /^[(（]\s?([〇零一兩二三四五六七八九十百千]+)\s?[)）]/,  // level 2
     /^(\d+|[０-９]+)\s?[、\.]/,                     // level 3

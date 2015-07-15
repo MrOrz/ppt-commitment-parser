@@ -68,6 +68,7 @@ describe('parse', () => {
           });
 
     expect(parsedData).to.have.length(1);
+    expect(parsedData[0].numberCH).to.equal('肆');
     expect(parsedData[0].text).to.equal('文 化');
 
     // 一、重要施政成果；二、創新作為；三、未來重點

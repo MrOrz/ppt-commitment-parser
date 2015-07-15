@@ -11,6 +11,7 @@ describe('LineMachine', () => {
               '一二三這是文字、不是標題': {level: -1},
               '見(一)這是文字、不是標題': {level: -1},
               '拾壹. 標題': {level: 0, numberCH: '拾壹', number: 11, text: '標題'},
+              '叁、教 育': {level: 0, numberCH: '叁', number: 3, text: '教 育'},
               '十 、標題': {level: 1, numberCH: '十', number: 10, text: '標題'},
               '兩百零一、標題': {level: 1, numberCH: '兩百零一', number: 201, text: '標題'},
               '（十一） 標題': {level: 2, numberCH: '十一', number: 11, text: '標題'},
