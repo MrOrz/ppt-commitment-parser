@@ -50,7 +50,7 @@ function convertToCSV(data) {
       }
 
       // title0 ~ title5, page, coordinate, text
-      rows.push(fullTitleArray.concat(lastSection.page, outputCoord, text));
+      rows.push([].concat(lastSection.errors.join(''), fullTitleArray, lastSection.page, outputCoord, text));
     }
 
   }
