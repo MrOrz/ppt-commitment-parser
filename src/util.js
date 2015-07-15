@@ -49,8 +49,19 @@ function convertToCSV(data) {
         outputCoord = lastSection.coord;
       }
 
+      // Aggregate errors in the stack.
+      let aggregatedErrors = [];
+      sectionStack.forEach((section) => {
+        if (!section.__isErrorOutputted) {
+          aggregatedErrors = aggregatedErrors.concat(section.errors);
+          // Errors just need to be output once
+          //
+          section.__isErrorOutputted = true;
+        }
+      });
+
       // title0 ~ title5, page, coordinate, text
-      rows.push([].concat(lastSection.errors.join(''), fullTitleArray, lastSection.page, outputCoord, text));
+      rows.push([].concat(aggregatedErrors.join(''), fullTitleArray, lastSection.page, outputCoord, text));
     }
 
   }
