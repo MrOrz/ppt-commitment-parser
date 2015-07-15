@@ -12,6 +12,9 @@ const TITLE_NUMBER_HIERARCHY = [
     /^[(（]\s?(\d+|[０１２３４５６７８９]+)\s?[)）]/,     // level 4
     /^([甲乙丙丁戊己庚辛壬癸])\s?[、,\.，]/,              // level 5
   ],
+  HIERARCHY_NAMES = [
+    '%s、', '%s、', '（%s）', '%s、', '(%s)', '%s、'
+  ],
   TITLE_NUMBER_HIERARCHY_COUNT = TITLE_NUMBER_HIERARCHY.length,
   FULLWIDTH_NUMBER_MAP = {
     '０': 0, '１': 1, '２': 2, '３': 3, '４': 4,
@@ -28,12 +31,9 @@ class LineMachine {
     this._output = [];
     this._sectionStack = []; // Level stack, each level one section
     this._indent = options.indent || Infinity;
-    this._shouldDetectCenteredTitle = options.center || false;
-    if (options.quiet && !options.onError) {
-      this._onError = NOOP;
-    }else {
-      this._onError = options.onError || this.onError;
-    }
+    this._shouldDetectCenteredTitle = options.center;
+    this._shouldPrintError = !options.quiet;
+    this._onError = options.onError || this.onError;
   }
 
   _getCurrentSection() {
@@ -71,6 +71,7 @@ class LineMachine {
 
   push(text, page, coord, isCentered = false) {
     const {level, numberCH, number, text: title} = this._extractTitleLevelAndNumbers(text);
+    var errors = [];
 
     if ((coord[0] <= this._indent || (this._shouldDetectCenteredTitle && isCentered)) &&
         level !== -1) {
@@ -89,9 +90,10 @@ class LineMachine {
         // Too shallow, add some padding sections.
         // TODO: give warnings here, since this often means a mistake in structure.
         //
-        this._onError('LEVEL_MISMATCH', {
-          text, page, coord, level, lastLevel: this._getCurrentTitleLevel()
-        });
+        errors.push(this._onError('LEVEL_MISMATCH', {
+          text, page, coord, level, lastLevel: this._getCurrentTitleLevel(),
+          numberCH, lastNumberCH: this._get
+        }));
 
         while (this._getCurrentTitleLevel() < level - 1) {
 
@@ -115,17 +117,17 @@ class LineMachine {
         // Number should succeed the previous section.
 
         if (lastSiblingSection.number !== number - 1) {
-          this._onError('NUMBER_MISMATCH', {
-            text, page, number, lastNumber: lastSiblingSection.number
-          });
+          errors.push(this._onError('NUMBER_MISMATCH', {
+            text, page, number, lastSiblingSection
+          }));
         }
       } else if (number !== 1) {
         // If no sibling has no title,
         // Current title's number should be 1
         //
-        this._onError('NUMBER_MISMATCH', {
-          text, page, number, lastNumber: 0
-        });
+        errors.push(this._onError('NUMBER_MISMATCH', {
+          text, page, number
+        }));
       }
 
       let titleParts = title.split(/[:：]/);
@@ -160,6 +162,10 @@ class LineMachine {
         this._getCurrentSection().appendText(text);
       }
 
+    }
+
+    if (errors.length) {
+      this._getCurrentSection().errors = errors;
     }
 
   }
@@ -209,23 +215,53 @@ class LineMachine {
     return number;
   }
 
+  // Default onError callback.
+  // Returns error message to append in the JSON structure.
+  // This method is made public so that custom error callback can invoke this
+  // default method when necessary.
+  //
   onError(type, err) {
+    var msg;
+
     switch (type){
     case 'PARSE_NUM':
-      console.error('[Error] Number parsing error: ', err.input);
+      msg = `[Error]「${err.input}」無法轉成數字。`;
       break;
 
     case 'LEVEL_MISMATCH':
-      console.error(`[Warning] Level mismatch: Line "${err.text}" @ p${err.page} is at level ${err.level},
-        but last line was at level ${err.lastLevel}.`);
+      if (err.lastLevel === -1) { // top level
+        msg = `[Warning] 「${err.text}」（p${err.page}）的文章標號從「${this._getHierarchyNotation(err.level, err.numberCH)}」開始，不符合標號階層。`;
+      }else {
+        let section = this._getCurrentSection();
+        if (section.numberCH) {
+          msg = `[Warning] 文章階層有誤：「${err.text}」（p${err.page}）文章標號為「${this._getHierarchyNotation(err.level, err.numberCH)}」，但前文標號為「${this._getHierarchyNotation(section.level, section.numberCH)}」。`;
+        }else {
+          msg = `[Warning] 文章階層有誤：「${err.text}」（p${err.page}）文章標號為「${this._getHierarchyNotation(err.level, err.numberCH)}」，但前文階層為 ${err.lastLevel}。`;
+        }
+      }
       break;
 
     case 'NUMBER_MISMATCH':
-      console.error(`[Warning] Number mismatch: Title "${err.text}" @ p${err.page} has number ${err.number}
-        but the last title number in this level is ${err.lastNumber}`);
+      if (!err.lastSiblingSection) {
+        msg = `[Warning] 標號有誤：「${err.text}」（p${err.page}）標號為 ${err.number}，但此標題應為該層的第 1 個標題。`;
+      }else {
+        msg = `[Warning] 標號有誤：「${err.text}」（p${err.page}）標號為 ${err.number}，但同階層的前一個標號為 ${err.lastSiblingSection.number}（p${err.lastSiblingSection.page}）。`;
+      }
       break;
+
+    default:
+      msg = `[Error] Unknown error ${JSON.stringify(err)}`;
     }
 
+    if (this._shouldPrintError) {
+      console.error(msg);
+    }
+
+    return msg;
+  }
+
+  _getHierarchyNotation(level, numberCH) {
+    return HIERARCHY_NAMES[level].replace('%s', numberCH);
   }
 }
 

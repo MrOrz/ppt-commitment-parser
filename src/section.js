@@ -8,6 +8,7 @@ class Section {
     this.page = page;
     this.coord = coord.slice(0);
     this.items = [];
+    this.errors = [];
   }
 
   appendText(textToAppend) {

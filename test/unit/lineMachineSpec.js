@@ -36,7 +36,8 @@ describe('LineMachine', () => {
       text: 'Line No. 1 Line No. 2',
       page: 1,
       coord: [0, 0], // Use the first word's coord
-      items: []
+      items: [],
+      errors: []
     });
   });
 
