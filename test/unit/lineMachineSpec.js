@@ -168,8 +168,8 @@ describe('LineMachine', () => {
   })
 
   it('should give warning when the title progression is not reasonable', () => {
-    const onError = spy(),
-          machine = new LineMachine({onError});
+    const machine = new LineMachine({quiet: true}),
+          onError = spy(machine, '_onError');
 
     // Test NUMBER_MISMATCH at top level
     //
