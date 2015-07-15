@@ -4,7 +4,7 @@
   "description": "將施政報告或施政綱要轉換成 CSV 的工具。",
   "main": "lib/index.js",
   "scripts": {
-    "watch": "npm run build -- --watch --source-maps inline",
+    "watch": "parallelshell \"npm run build -- --watch --source-maps inline\" \"npm test -- --watch\"",
     "build": "babel src --out-dir lib --stage $npm_package_config_stage --optional runtime",
     "prepublish": "NODE_ENV=production npm run build",
     "test": "mocha --require ./config/mocha-babel test/unit/*.js",
@@ -49,6 +49,7 @@
     "jscs": "^1.13.1",
     "mocha": "^2.2.5",
     "mocha-lcov-reporter": "0.0.2",
+    "parallelshell": "^1.2.0",
     "sinon": "^1.15.4",
     "sinon-chai": "^2.8.0"
   }
