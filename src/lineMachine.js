@@ -5,12 +5,12 @@ import {parseZHNumber} from 'zhutil';
 import Section from './section';
 
 const TITLE_NUMBER_HIERARCHY = [
-    /^([〇零壹貳參叄肆伍陸柒捌玖拾佰仟]+)\s?[、,\.，]/,     // level 0
-    /^([〇零一兩二三四五六七八九十百千]+)\s?[、,\.，]/,     // level 1
-    /^[(（]\s?([〇零一兩二三四五六七八九十百千]+)\s?[)）]/, // level 2
-    /^(\d+|[０１２３４５６７８９]+)\s?[、,\.，]/,         // level 3
-    /^[(（]\s?(\d+|[０１２３４５６７８９]+)\s?[)）]/,     // level 4
-    /^([甲乙丙丁戊己庚辛壬癸])\s?[、,\.，]/,              // level 5
+    /^([〇零壹貳參叄肆伍陸柒捌玖拾佰仟]+)\s?[、,\.，]/,      // level 0
+    /^([〇零一兩二三四五六七八九十百千]+)\s?[、,\.，]/,      // level 1
+    /^[(（]\s?([〇零一兩二三四五六七八九十百千]+)\s?[)）]/,  // level 2
+    /^(\d+|[０-９]+)\s?[、,\.，]/,                     // level 3
+    /^[(（]\s?(\d+|[０-９]+)\s?[)）]/,                 // level 4
+    /^([甲乙丙丁戊己庚辛壬癸a-zａ-ｚA-ZＡ-Ｚ])\s?[、,\.，]/,// level 5
   ],
   HIERARCHY_NAMES = [
     '%s、', '%s、', '（%s）', '%s、', '(%s)', '%s、'
@@ -204,8 +204,14 @@ class LineMachine {
         }
       }
     } else {
-      // 甲乙丙丁
-      number = HEAVENSTEM_NUMBER_MAP[input];
+      // 甲乙丙丁 or ABCD or full-width ABCD
+      if (input.match(/[a-zA-Z]/)) {
+        number = input.toLowerCase().charCodeAt(0) - 'a'.charCodeAt(0) + 1;
+      } else if (input.match(/[ａ-ｚＡ-Ｚ]/)) {
+        number = input.toLowerCase().charCodeAt(0) - 'ａ'.charCodeAt(0) + 1;
+      } else {
+        number = HEAVENSTEM_NUMBER_MAP[input];
+      }
     }
 
     if (isNaN(number)) {

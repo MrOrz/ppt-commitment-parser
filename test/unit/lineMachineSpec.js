@@ -16,7 +16,9 @@ describe('LineMachine', () => {
               '（十一） 標題': {level: 2, numberCH: '十一', number: 11, text: '標題'},
               '３１、415': {level: 3, numberCH: '３１', number: 31, text: '415'},
               '(21) 34': {level: 4, numberCH: '21', number: 21, text: '34'},
-              '甲、乙': {level: 5, numberCH: '甲', number: 1, text: '乙'}
+              '甲、乙': {level: 5, numberCH: '甲', number: 1, text: '乙'},
+              'Ａ.apple': {level: 5, numberCH: 'Ａ', number: 1, text: 'apple'},
+              'a.apple': {level: 5, numberCH: 'a', number: 1, text: 'apple'},
             };
 
       Object.keys(testMap).forEach(test => {
