@@ -33,7 +33,7 @@ class LineMachine {
     this._indent = options.indent || Infinity;
     this._shouldDetectCenteredTitle = options.center;
     this._shouldPrintError = !options.quiet;
-    this._onError = options.onError || this.onError;
+    this._onError = options.onError.bind(this) || this.onError;
   }
 
   _getCurrentSection() {
