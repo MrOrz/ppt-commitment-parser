@@ -92,7 +92,7 @@ class LineMachine {
         //
         errors.push(this._onError('LEVEL_MISMATCH', {
           text, page, coord, level, lastLevel: this._getCurrentTitleLevel(),
-          numberCH, lastNumberCH: this._get
+          numberCH
         }));
 
         while (this._getCurrentTitleLevel() < level - 1) {
