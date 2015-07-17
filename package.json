@@ -1,6 +1,6 @@
 {
   "name": "ppt-commitment-parser",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "將施政報告或施政綱要轉換成 CSV 的工具。",
   "main": "lib/index.js",
   "scripts": {
